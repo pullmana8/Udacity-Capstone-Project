@@ -4,6 +4,9 @@ import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
+import { APIService } from './API.service'
+import { createTodo } from 'src/graphql/mutations';
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
