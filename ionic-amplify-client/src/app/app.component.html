@@ -1,1 +1,5 @@
-<ion-button (click)="createTodo()">Add Data</ion-button>
+<ion-list>
+    <ion-item *ngFor="let item of todos">
+      {% raw %}{{item.name}}{% endraw %} - {% raw %}{{item.description}}{% endraw %}
+    </ion-item>
+  </ion-list>
