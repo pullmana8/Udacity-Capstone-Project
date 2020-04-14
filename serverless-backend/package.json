@@ -14,7 +14,8 @@
     "jsonwebtoken": "^8.5.1",
     "source-map-support": "^0.5.10",
     "uuid": "^7.0.3",
-    "middy": "^0.35.0"
+    "middy": "^0.35.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.17",
@@ -25,13 +26,13 @@
     "prettier": "^2.0.4",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-iam-roles-per-function": "^2.0.2",
+    "serverless-plugin-warmup": "^4.9.0",
     "serverless-reqvalidator-plugin": "^1.0.3",
     "serverless-webpack": "^5.3.1",
     "ts-loader": "^5.3.3",
     "typescript": "^3.2.4",
     "webpack": "^4.29.0",
-    "webpack-node-externals": "^1.7.2",
-    "winston": "^3.2.1"
+    "webpack-node-externals": "^1.7.2"
   },
   "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
   "license": "MIT"

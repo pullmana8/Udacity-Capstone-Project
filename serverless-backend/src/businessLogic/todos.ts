@@ -25,6 +25,7 @@ export async function createTodoItem(
         name: createTodoRequest.name,
         dueDate: createTodoRequest.dueDate,
         done: createTodoRequest.done,
-        attachmentUrl: createTodoRequest.attachmentUrl
+        attachmentUrl: createTodoRequest.attachmentUrl,
+        hasImage: createTodoRequest.hasImage
     })
 }

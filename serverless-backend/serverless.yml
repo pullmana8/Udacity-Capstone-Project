@@ -1,12 +1,28 @@
 service:
   name: serverless-backend
 
+package:
+  individually: true 
+
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+    packagerOptions:
+      scripts:
+        - rm -rf node_modules/aws-sdk
 
-# Add the serverless-webpack plugin
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Serverless Todo API
+        description: Serverless application for todo tasks
+    models:
+      - name: CreateTodoRequest
+        contentType: application/json
+        schema: ${file(src/models/create-todo-request.json)}
+
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function # plugin is needed to utilize the roles per function separately
@@ -34,13 +50,6 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:Scan
-        - dynamodb:Query
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-    - Effect: Allow
-      Action:
         - secretsmanager:GetSecretValue
       Resource:
         Ref: Auth0Secret
@@ -56,21 +65,24 @@ provider:
 functions:
   RS256Auth:
     handler: src/lambda/auth/rs256Auth0Authorizer.handler
+
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
+
   GetTodos:
     handler: src/lambda/http/getTodos.handler
     events:
       - http:
           method: get
           path: todos
-          authorizer: RS256Auth
+#          authorizer: RS256Auth
           cors: true
     iamRoleStatementsName: Get-Todos
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Scan
+          - dynamodb:GetItem
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
@@ -99,7 +111,7 @@ functions:
           method: post
           path: todos
           cors: true
-          authorizer: RS256Auth
+#          authorizer: RS256Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new todo item
@@ -110,6 +122,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:Scan
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
@@ -130,13 +143,49 @@ functions:
           method: post
           path: todos/{todoId}/attachment
           cors: true
-          authorizer: RS256Auth
+#          authorizer: RS256Auth
     iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
       - Effect: Allow
         Action:
           - xray:PutTelemetryRecords
           - xray:PutTraceSegments
         Resource: '*'
+      - Effect: Allow
+        Action:
+          - logs:CreateLogStream
+          - logs:CreateLogGroup
+          - logs:PutLogEvents
+        Resource: '*'
+
+#  ImageUploaded:
+#    handler: src/lambda/s3/s3ImageUploaded.handler
+#    events:
+#      - s3:
+#          bucket: ${self:provider.environment.IMAGES_S3_BUCKET}
+#          event: s3:ObjectCreated:*
+#          existing: true
+#    iamRoleStatementsName: Image-Uploaded
+#    iamRoleStatements:
+#      - Effect: Allow
+#        Action:
+#          - dynamodb:Query
+#          - dynamodb:UpdateItem
+#        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+#      - Effect: Allow
+#        Action:
+#          - xray:PutTraceSegments
+#        Resource: "*"
+#      - Effect: Allow
+#        Action:
+#          - logs:CreateLogStream
+#          - logs:CreateLogGroup
+#          - logs:PutLogEvents
+#        Resource: "*"
 
 resources:
   Resources:
@@ -145,7 +194,7 @@ resources:
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
         ResponseType: DEFAULT_4XX
         RestApiId:
